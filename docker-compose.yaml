@@ -1,0 +1,44 @@
+version: "3"
+services:
+  rental_flow_nginx:
+    build:
+      dockerfile: ./docker/nginx.Dockerfile
+      context: .
+    container_name: rental_flow_nginx
+    ports:
+      - 85:80
+    depends_on:
+      - rental_flow_php_1
+
+  rental_flow_php_1:
+    build:
+      dockerfile: ./docker/php.Dockerfile
+      context: .
+    container_name: rental_flow_php_1
+    volumes:
+      - ./app:/var/www/html
+    #      - .auth.json:/var/www/html/src/auth.json
+    depends_on:
+      - rental_flow_db
+      - redis
+
+  rental_flow_db:
+    image: mariadb:10.9
+    container_name: rental_flow_db
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ROOT_USER=${DB_ROOT_USER}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - db-volume:/var/lib/mysql
+      - ./docker/etc/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #            - /etc/timezone:/etc/timezone:ro
+  #            - /etc/localtime:/etc/localtime:ro
+
+volumes:
+  db-volume:
