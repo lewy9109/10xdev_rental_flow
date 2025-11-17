@@ -20,7 +20,6 @@ services:
     #      - .auth.json:/var/www/html/src/auth.json
     depends_on:
       - rental_flow_db
-      - redis
 
   rental_flow_db:
     image: mariadb:10.9
