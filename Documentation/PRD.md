@@ -349,7 +349,7 @@ Scenariusz referencyjny (pod test e2e):
 
 - Backend: **Symfony** (aktualna stabilna wersja).
 - Panel: **EasyAdmin Bundle**.
-- Baza danych: **PostgreSQL**.
+- Baza danych: **MariaDb**.
 - Konteneryzacja: **Docker** (Dockerfile + `docker-compose` dla dev i prod).
 - Frontend: szablony **Twig** / EasyAdmin (bez SPA).
 
