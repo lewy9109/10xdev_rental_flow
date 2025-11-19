@@ -1,29 +1,29 @@
 version: "3"
 services:
-  rental_flow_nginx:
+  nginx:
     build:
       dockerfile: ./docker/nginx.Dockerfile
       context: .
-    container_name: rental_flow_nginx
+    container_name: nginx
     ports:
       - 85:80
     depends_on:
-      - rental_flow_php_1
+      - php
 
-  rental_flow_php_1:
+  php:
     build:
       dockerfile: ./docker/php.Dockerfile
       context: .
-    container_name: rental_flow_php_1
+    container_name: php
     volumes:
       - ./app:/var/www/html
     #      - .auth.json:/var/www/html/src/auth.json
     depends_on:
-      - rental_flow_db
+      - db
 
-  rental_flow_db:
+  db:
     image: mariadb:10.9
-    container_name: rental_flow_db
+    container_name: db
     restart: unless-stopped
     environment:
       - MYSQL_DATABASE=${DB_DATABASE}
