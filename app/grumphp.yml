@@ -1,0 +1,59 @@
+grumphp:
+    process_timeout: 120
+    hide_circumvention_tip: true
+    stop_on_failure: true
+    tasks:
+        git_blacklist:
+            keywords:
+                - "die\\("
+                - "exit\\("
+                - "var_dump\\("
+                - "dump\\("
+                - "console\\.log\\("
+                - "phpinfo\\("
+                - "print_r\\("
+                - "phpinfo"
+                - "die;"
+                - "exit;"
+            triggered_by: [ 'php', 'js', 'html', 'twig' ]
+            regexp_type: E
+            metadata:
+                priority: 4
+        phplint:
+            metadata:
+                priority: 4
+        yamllint:
+            parse_custom_tags: true
+            metadata:
+                priority: 4
+        composer:
+            metadata:
+                priority: 3
+        phpcsfixer:
+            config: '.php-cs-fixer.dist.php'
+            metadata:
+                priority: 2
+        phpcpd:
+            metadata:
+                priority: 2
+            directory: [ 'src']
+            exclude: [ 'vendor' ]
+            fuzzy: false
+            min_lines: 5
+            min_tokens: 70
+            triggered_by: [ 'php' ]
+        phpunit:
+            metadata:
+                priority: 2
+            config_file: 'phpunit.unit.xml'
+            testsuite: unit
+            group: [ ]
+            exclude_group: [ ]
+            always_execute: false
+            order: null
+        phpstan:
+            configuration: phpstan.neon
+            memory_limit: "-1"
+            ignore_patterns: ['.php-cs-fixer.dist.php']
+            metadata:
+                priority: 1
