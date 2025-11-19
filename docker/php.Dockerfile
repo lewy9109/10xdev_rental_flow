@@ -10,9 +10,11 @@ RUN apt-get update && \
     vim \
     zip && \
     docker-php-ext-install mysqli pdo_mysql pdo_pgsql pgsql && \
-    pecl install -o -f redis && \
+    pecl install -o -f redis  && \
     docker-php-ext-enable redis && \
-    rm -rf /var/lib/apt/lists/* /tmp/pear
+    pecl install xdebug &&\
+    docker-php-ext-enable xdebug  &&\
+    rm -rf /var/lib/apt/lists/* /tmp/pear \
 
 COPY ./app /var/www/html
 

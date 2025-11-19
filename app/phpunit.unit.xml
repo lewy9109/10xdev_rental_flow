@@ -1,63 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         backupGlobals="false"
-         colors="true"
-         bootstrap="tests/bootstrap.php"
-         convertDeprecationsToExceptions="false"
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+        bootstrap="vendor/autoload.php"
+        colors="true"
+        cacheDirectory=".phpunit.cache"
 >
-    <php>
-        <ini name="display_errors" value="1" />
-        <ini name="error_reporting" value="-1" />
-        <ini name="memory_limit" value="-1" />
-        <server name="APP_ENV" value="test" force="true" />
-        <server name="SHELL_VERBOSITY" value="-1" />
-        <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
-        <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled" />
-    </php>
-
     <testsuites>
-        <testsuite name="Unit_1">
-            <directory>tests/Unit/Command</directory>
-            <directory>tests/Unit/Entity</directory>
-            <directory>tests/Unit/EventListener</directory>
-            <directory>tests/Unit/Form</directory>
-            <directory>tests/Unit/Helpers</directory>
-            <directory>tests/Unit/Message</directory>
+        <testsuite name="Project Test Suite">
+            <directory>tests</directory>
         </testsuite>
-        <testsuite name="Unit_2">
-            <directory>tests/Unit/Repository</directory>
-            <directory>tests/Unit/Security</directory>
-            <directory>tests/Unit/Serializer</directory>
-            <directory>tests/Unit/Service</directory>
-            <directory>tests/Unit/Validator</directory>
-        </testsuite>
-        <testsuite name="Functional">
-            <directory>tests/Functional</directory>
-        </testsuite>
-<!--        <testsuite name="Integration">-->
-<!--            <directory>tests/Integration</directory>-->
-<!--        </testsuite>-->
     </testsuites>
 
-    <coverage processUncoveredFiles="true">
+    <php>
+        <ini name="error_reporting" value="-1"/>
+        <env name="APP_ENV" value="test"/>
+        <env name="APP_DEBUG" value="1"/>
+        <env name="SHELL_VERBOSITY" value="-1"/>
+    </php>
+
+    <coverage>
         <include>
             <directory suffix=".php">src</directory>
         </include>
-        <exclude>
-            <directory>./src/Controller/Admin</directory>
-            <directory>./src/Controller/Admin/*</directory>
-        </exclude>
+        <report>
+            <html outputDirectory="var/coverage" lowUpperBound="50" highLowerBound="90"/>
+            <text outputFile="var/coverage.txt"/>
+        </report>
     </coverage>
-
-    <listeners>
-        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
-    </listeners>
-
-    <extensions>
-        <extension class="App\Tests\Hook\MockFinalClassHook"/>
-    </extensions>
 </phpunit>
