@@ -1,115 +1,248 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
+use App\Entity\Contract\RentalContract;
+use App\Entity\Property\Property;
+use App\Entity\PropertyUnit\PropertyUnit;
+use App\Entity\Security\PasswordResetToken;
+use App\Entity\Tenant\Tenant;
 use App\Repository\UserRepository;
-use Deprecated;
+use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\Table(name: 'app_user')]
+#[ORM\UniqueConstraint(name: 'uniq_app_user_email', columns: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private Uuid $id;
 
-    #[ORM\Column(length: 180)]
-    private ?string $email = null;
+    #[ORM\Column(length: 255)]
+    private string $email;
 
     /**
-     * @var list<string> The user roles
+     * @var list<string>
      */
-    #[ORM\Column]
+    #[ORM\Column(type: 'json')]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
-    #[ORM\Column]
-    private ?string $password = null;
+    #[ORM\Column(length: 255)]
+    private string $password;
 
-    public function getId(): ?int
+    #[ORM\Column(length: 150, nullable: true)]
+    private ?string $fullName;
+
+    #[ORM\Column(type: 'boolean')]
+    private bool $isActive = true;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $lastLoginAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable')]
+    private DateTimeImmutable $updatedAt;
+
+    /**
+     * @var Collection<int, Property>
+     */
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Property::class)]
+    private Collection $properties;
+
+    /**
+     * @var Collection<int, PropertyUnit>
+     */
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: PropertyUnit::class)]
+    private Collection $units;
+
+    /**
+     * @var Collection<int, Tenant>
+     */
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Tenant::class)]
+    private Collection $tenants;
+
+    /**
+     * @var Collection<int, RentalContract>
+     */
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: RentalContract::class)]
+    private Collection $contracts;
+
+    /**
+     * @var Collection<int, PasswordResetToken>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: PasswordResetToken::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
+    private Collection $passwordResetTokens;
+
+    public function __construct(string $email, string $password, ?string $fullName = null)
+    {
+        $this->id = Uuid::v7();
+        $this->email = mb_strtolower($email);
+        $this->password = $password;
+        $this->fullName = $fullName;
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = $this->createdAt;
+        $this->properties = new ArrayCollection();
+        $this->units = new ArrayCollection();
+        $this->tenants = new ArrayCollection();
+        $this->contracts = new ArrayCollection();
+        $this->passwordResetTokens = new ArrayCollection();
+    }
+
+    public function getId(): Uuid
     {
         return $this->id;
     }
 
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function updateEmail(string $email): void
     {
-        $this->email = $email;
+        $this->email = mb_strtolower($email);
+        $this->touch();
+    }
 
-        return $this;
+    public function getFullName(): ?string
+    {
+        return $this->fullName;
+    }
+
+    public function updateFullName(?string $fullName): void
+    {
+        $this->fullName = $fullName;
+        $this->touch();
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function deactivate(): void
+    {
+        $this->isActive = false;
+        $this->touch();
+    }
+
+    public function activate(): void
+    {
+        $this->isActive = true;
+        $this->touch();
+    }
+
+    public function markLogin(DateTimeImmutable $moment): void
+    {
+        $this->lastLoginAt = $moment;
+        $this->touch();
+    }
+
+    public function getLastLoginAt(): ?DateTimeImmutable
+    {
+        return $this->lastLoginAt;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): DateTimeImmutable
+    {
+        return $this->updatedAt;
     }
 
     /**
-     * A visual identifier that represents this user.
+     * @see UserInterface
      *
-     * @see UserInterface
-     */
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
-
-    /**
-     * @see UserInterface
+     * @return list<string>
      */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+        return array_values(array_unique($roles));
     }
 
     /**
      * @param list<string> $roles
      */
-    public function setRoles(array $roles): static
+    public function setRoles(array $roles): void
     {
-        $this->roles = $roles;
-
-        return $this;
+        $this->roles = array_values($roles);
+        $this->touch();
     }
 
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(string $password): void
     {
         $this->password = $password;
+        $this->touch();
+    }
 
-        return $this;
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function eraseCredentials(): void
+    {
     }
 
     /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
+     * @return Collection<int, Property>
      */
-    public function __serialize(): array
+    public function getProperties(): Collection
     {
-        $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
-
-        return $data;
+        return $this->properties;
     }
 
-    #[Deprecated]
-    public function eraseCredentials(): void
+    /**
+     * @return Collection<int, PropertyUnit>
+     */
+    public function getUnits(): Collection
     {
-        // @deprecated, to be removed when upgrading to Symfony 8
+        return $this->units;
+    }
+
+    /**
+     * @return Collection<int, Tenant>
+     */
+    public function getTenants(): Collection
+    {
+        return $this->tenants;
+    }
+
+    /**
+     * @return Collection<int, RentalContract>
+     */
+    public function getContracts(): Collection
+    {
+        return $this->contracts;
+    }
+
+    private function touch(): void
+    {
+        $this->updatedAt = new DateTimeImmutable();
     }
 }

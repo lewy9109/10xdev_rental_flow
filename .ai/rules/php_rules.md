@@ -55,3 +55,34 @@ These rules reflect the highest standards of clean code, architecture, and backe
 - Use the CrudController only for rendering and delegating logic
 
 ---
+
+### Entity
+- Create entity with Value Object using embedded
+  - For each Entity create Folder With Same name example:
+
+``` php
+Folder: /src/Entity/User  
+ 
+  #[Entity]
+  class User
+  {
+      #[Embedded(class: Address::class)]
+      private Address $address;
+  }
+  
+  Value Object:
+  #[Embeddable]
+  class Address
+  {
+      #[Column(type: "string")]
+      private string $street;
+      #[Column(type: "string")]
+      private string $postalCode;
+      #[Column(type: "string")]
+      private string $city;
+      #[Column(type: "string")]
+      private string $country;
+}
+```
+- Value Object should be immutable
+- Each Value Object should have unit tests

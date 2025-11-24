@@ -25,7 +25,7 @@ RentalFlow solves these issues by centralizing data, automating calculations, an
 - Single role in MVP: owner
 - Entire application protected behind authentication
 
-### 3.2. Properties & Units
+### 3.2. Properties
 - CRUD for properties and units
 - Property fields: name/label, address, apartment number, size, type (optional)
 - Unit listing per property
@@ -35,7 +35,7 @@ RentalFlow solves these issues by centralizing data, automating calculations, an
 - Fields: first name, last name, email, phone (optional), notes (optional)
 
 ### 3.4. Rental Contracts
-- Associate tenant with unit
+- Associate tenant with Properties
 - Fields: start date, end date (optional), monthly rent, optional deposit, status
 - Contract details view with linked payment schedule
 - Editing basic contract details
