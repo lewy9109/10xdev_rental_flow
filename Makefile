@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help2
 
-CONTAINER_NAME = rental_flow_php
-DB_CONTAINER_NAME = rental_flow_db
+CONTAINER_NAME = php
+DB_CONTAINER_NAME = db
 ENV_FILE_PATH = .env
 
 ifneq ("$(wildcard $(ENV_FILE_PATH))","")
